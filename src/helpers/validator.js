@@ -10,5 +10,7 @@ const validators = {}
 const deprecatedWarnings = {}
 
 validators.transitional = function transitional(validator, version, message) {
-  
+  function formatMessage(opt, desc) {
+    return `[Axios v ${VERSION}] Transitional option '${opt}'${desc} ${message ? '. ' + message : ''}`
+  }
 }

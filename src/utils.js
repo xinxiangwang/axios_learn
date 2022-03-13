@@ -35,7 +35,7 @@ function forEach(obj, fn) {
   }
 }
 
-function merge() {
+function merge() { // 合并参数
   let result = {}
   function assignValue(val, key) {
     if (isPlainObject(result[key]) && isPlainObject(val)) {
@@ -58,10 +58,35 @@ function isUndefined(val) {
   return typeof val === 'undefined';
 }
 
+function inherits(constructor, superConstructor, props, descriptors) { // 对象继承
+  constructor.prototype = Object.create(superConstructor.prototype, descriptors)
+  constructor.prototype.constructor = constructor
+  props && Object.assign(constructor.prototype, props)
+}
+
+function toFlatObject(sourceObj, destObj = {}, filter) {
+  let props, i, prop, merged = {}
+  do {
+    props = Object.getOwnPropertyNames(sourceObj)
+    i = props.length
+    while (i-- > 0) {
+      prop = props[i]
+      if (!merged[prop]) {
+        destObj[prop] = sourceObj[prop]
+        merged[prop] = true // 标记已合并
+      }
+    }
+    sourceObj = Obj.getPrototypeOf(sourceObj)
+  } while (sourceObj && (!filter || filter(sourceObj, destObj)) && sourceObj !== Object.prototype)
+  return destObj
+}
+
 module.exports = {
   isPlainObject,
   forEach,
   merge,
   isArray,
-  isUndefined
+  isUndefined,
+  inherits,
+  toFlatObject
 }

@@ -74,8 +74,10 @@ module.exports = function mergeConfig(config1, config2 = {}) {
 
   utils.forEach(Object.keys(config1).concat(Object.keys[config2]), function computeConfigValue(prop) {
     const merge = mergeMap[prop] || mergeDeepProperties
-    const configValue = merge(prop)
-    (utils.isUndefined(configValue) && merge !== mergeDirectKeys) || (config[prop] = configValue)
+    var configValue = merge(prop)
+    if ((utils.isUndefined(configValue) && merge !== mergeDirectKeys)) {
+      config[prop] = configValue
+    }
   })
 
   return config

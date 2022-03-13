@@ -1,5 +1,5 @@
 const Axios = require('./core/Axios')
-const axios = new Axios()
+const axios = new Axios({})
 
 axios.request()
 
