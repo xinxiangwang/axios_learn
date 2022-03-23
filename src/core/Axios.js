@@ -1,5 +1,7 @@
 const InterceptorManager = require("./InterceptorManager")
 const mergeConfig = require('./mergeConfig')
+const validator = require('../helpers/validator')
+const validators = validator.validators
 
 function Axios(instanceConfig) {
   this.defaults = instanceConfig
@@ -27,8 +29,30 @@ Axios.prototype.request = function request(configOrUrl, config) {
   }
   const transitional = config.transitional
   if (transitional !== undefined) {
-    
+    validator.assertOptions(transitional, {
+      silentJSONParsing: validators.transitional(validators.boolean),
+      forcedJSONParsing: validators.transitional(validators.boolean),
+      clarifyTimeoutError: validators.transitional(validators.boolean)
+    }, false)
   }
+
+  const requestInterceptorChain = []
+  let synchronousRequestInterceptors = true
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) { // interceptor 为handlers每一项
+    if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+      return
+    }
+    synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronousRequestInterceptors
+    requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected)
+  })
+
+  const responseInterceptorChain = []
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected)
+  })
+
+  const promise = null;
+
 }
 
 module.exports = Axios
