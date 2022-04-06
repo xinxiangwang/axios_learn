@@ -52,7 +52,9 @@ Axios.prototype.request = function request(configOrUrl, config) {
   })
 
   const promise = null;
-
+  if (!synchronousRequestInterceptors) {
+    let chain = [dispa]
+  }
 }
 
 module.exports = Axios

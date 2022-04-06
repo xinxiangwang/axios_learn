@@ -81,6 +81,14 @@ function toFlatObject(sourceObj, destObj = {}, filter) {
   return destObj
 }
 
+function isString(val) {
+  return typeof val === 'string'
+}
+
+function trim(str) {
+  return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
+}
+
 module.exports = {
   isPlainObject,
   forEach,
@@ -88,5 +96,7 @@ module.exports = {
   isArray,
   isUndefined,
   inherits,
-  toFlatObject
+  toFlatObject,
+  isString,
+  trim
 }

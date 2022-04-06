@@ -1,7 +1,7 @@
 const VERSION = require('../env/data')
 const validators = {}
-
-['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach((type, idx) => {
+const arr = ['object', 'boolean', 'number', 'function', 'string', 'symbol']
+arr.forEach((type, idx) => {
   validators[type] = (thing) => {
     return typeof thing === type || 'a' + (i < 1 ? 'n ' : '') + type
   }
