@@ -89,6 +89,53 @@ function trim(str) {
   return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
 }
 
+function isFormData() {
+  return toString.call(val) === '[object FormData]'
+}
+
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (isArrayBuffer(val.buffer));
+  }
+  return result;
+}
+
+function isURLSearchParams(val) {
+  return toString.call(val) === '[object URLSearchParams]';
+}
+
 module.exports = {
   isPlainObject,
   forEach,
@@ -98,5 +145,15 @@ module.exports = {
   inherits,
   toFlatObject,
   isString,
-  trim
+  trim,
+  isFormData,
+  isArrayBuffer,
+  isBlob,
+  isStream,
+  isObject,
+  isFunction,
+  isBuffer,
+  isFile,
+  isArrayBufferView,
+  isURLSearchParams
 }

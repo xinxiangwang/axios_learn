@@ -1,6 +1,6 @@
 const utils = require('./utils')
-const normalizeName = require('./helpers/normalizeHeaderName')
 const enhanceError = require('./core/enhanceError')
+const normalizeHeaderName = require('./helpers/normalizeHeaderName')
 
 const DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencode'
@@ -36,3 +36,81 @@ function stringifySafely(rawValue, parser, encoder) {
   return (encoder || JSON.stringify)(rawValue)
 }
 
+const defaults = {
+  transitional: {
+    silentJSONParsing: true,
+    forcedJSONParsing: true,
+    clarifyTimeoutError: false
+  },
+  adapter: getDefaultAdapter(),
+  transformRequest: [
+    (data, headers) => {
+      normalizeHeaderName(headers, 'Accept')
+      normalizeHeaderName(headers, 'Content-Type')
+      if (
+        utils.isFormData(data) ||
+        utils.isArrayBuffer(data) ||
+        utils.isBuffer(data) ||
+        utils.isStream(data) ||
+        utils.isFile(data) ||
+        utils.isBlob(data)
+      ) {
+        return data
+      }
+
+      if (utils.isArrayBufferView(data)) {
+        return data.buffer
+      }
+      if (utils.isURLSearchParams(data)) {
+        setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset:utf-8')
+        return data.toString()
+      }
+      if (utils.isObject(data) || (headers && headers['Content-Type'] === 'application/json')) {
+        setContentTypeIfUnset(headers, 'application/json')
+        return stringifySafely(data)
+      }
+      return data
+    }
+  ],
+  transformResponse: [function transformResponse(data) {
+    const transitional = this.transitional || defaults.transitional
+    const silentJSONParsing = transitional && transitional.silentJSONParsing
+    const forcedJSONParsing = transitional && transitional.forcedJSONParsing
+    const strictJSONParsing = !silentJSONParsing && this.responseType === 'json'
+    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
+      try {
+        return JSON.parse(data)
+      } catch (e) {
+        if (strictJSONParsing) {
+          if (e.name === 'SyntaxError') {
+            throw enhanceError(e, this, 'E_JSON_PARSE')
+          }
+        }
+      }
+      return data
+    }
+  }],
+  timeout: 0,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+  maxContentLength: -1,
+  maxBodyLength: -1,
+  validateStatus(status) {
+    return status >= 200 && status < 300
+  },
+  headers: {
+    common: {
+      'Accept': 'application/json, text/plain, */*'
+    }
+  }
+}
+
+utils.forEach(['post', 'put', 'patch'], (method) => {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE)
+})
+
+utils.forEach(['delete', 'get', 'head'], (method) => {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE)
+})
+
+module.exports = defaults
