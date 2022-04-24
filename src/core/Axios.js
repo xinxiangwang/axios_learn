@@ -53,7 +53,21 @@ Axios.prototype.request = function request(configOrUrl, config) {
 
   const promise = null;
   if (!synchronousRequestInterceptors) {
-    let chain = [dispa]
+    // let chain = [dispa]
+  }
+  const request = new XMLHttpRequest()
+  request.open('get', 'http://www.baidu.com')
+  request.send()
+  request.onloadend = () => {
+    console.log('加载完毕')
+  }
+  request.onreadystatechange = (res) => {
+    setTimeout(() => {
+      console.log('readystatechange', request.readyState)
+    })
+  }
+  request.onerror = (err) => {
+    console.log('出错了', err)
   }
 }
 

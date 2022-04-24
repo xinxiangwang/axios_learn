@@ -2,6 +2,19 @@ function isArray(val) {
   return Array.isArray(val)
 }
 
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (
+    navigator.product === 'ReactNative' ||
+    navigator.product === 'NativeScript' ||
+    navigator.product === 'NS'
+  )) {
+    return
+  }
+  return (
+    typeof window !== 'undefined' && typeof document !== 'undefined'
+  )
+}
+
 const toString = Object.prototype.toString
 
 function isPlainObject(val) { // 判断是否为普通对象（Object）
@@ -101,6 +114,10 @@ function isBlob(val) {
   return toString.call(val) === '[object Blob]';
 }
 
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
 function isStream(val) {
   return isObject(val) && isFunction(val.pipe);
 }
@@ -155,5 +172,6 @@ module.exports = {
   isBuffer,
   isFile,
   isArrayBufferView,
-  isURLSearchParams
+  isURLSearchParams,
+  isDate
 }
