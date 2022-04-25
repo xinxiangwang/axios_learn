@@ -153,6 +153,10 @@ function isURLSearchParams(val) {
   return toString.call(val) === '[object URLSearchParams]';
 }
 
+function isNumber(val) {
+  return typeof val === 'number'
+}
+
 module.exports = {
   isPlainObject,
   forEach,
@@ -173,5 +177,7 @@ module.exports = {
   isFile,
   isArrayBufferView,
   isURLSearchParams,
-  isDate
+  isDate,
+  isStandardBrowserEnv,
+  isNumber
 }

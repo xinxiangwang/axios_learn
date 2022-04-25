@@ -5,6 +5,8 @@ import settle from '../core/settle'
 import parseHeaders from '../core/parseHeaders'
 import createError from '../core/createError'
 import defaults from '../defaults'
+const isURLSameOrigin = require('./../helpers/isURLSameOrigin');
+import cookies from '../helpers/cookies'
 
 module.exports = function xhrAdapter(config) {
   return new Promise((resolve, reject) => {
@@ -102,7 +104,11 @@ module.exports = function xhrAdapter(config) {
 
 
     if (utils.isStandardBrowserEnv()) {
-      // const xsrfValue = (config.withCredentials || )
+      const xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xrsfCookieName ?
+        cookies.read(config.xrsfCookieName) : undefined
+      if (xsrfValue) {
+        requestHeaders[config.xrsfCookieName] = xsrfValue
+      }
     }
 
   })
