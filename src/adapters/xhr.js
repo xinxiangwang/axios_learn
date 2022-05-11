@@ -7,6 +7,7 @@ import createError from '../core/createError'
 import defaults from '../defaults'
 const isURLSameOrigin = require('./../helpers/isURLSameOrigin');
 import cookies from '../helpers/cookies'
+import Cancel from '../cancel/Cancel'
 
 module.exports = function xhrAdapter(config) {
   return new Promise((resolve, reject) => {
@@ -54,8 +55,10 @@ module.exports = function xhrAdapter(config) {
       }
       settle(function _resolve(value) {
         resolve(value)
+        done()
       }, function _rejected(err) {
         reject(err)
+        done()
       }, response)
 
       request = null
@@ -110,6 +113,51 @@ module.exports = function xhrAdapter(config) {
         requestHeaders[config.xrsfCookieName] = xsrfValue
       }
     }
+
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, (val, key) => {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          delete requestData[key]
+        } else {
+          request.setRequestHeader(key, val)
+        }
+      })
+    }
+
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!request.withCredentials
+    }
+    if (responseType && responseType !== 'json') {
+      request.responseType = config.responseType
+    }
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress)
+    }
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress)
+    }
+
+    if (config.cancelToken || config.signal) {
+      onCanceled = function(cancel) {
+        if (!request) {
+          return
+        }
+        reject(cancel && (cancel && cancel.type) ? new Cancel('canceled') : cancel)
+        request.abort()
+        request = null
+      }
+
+      config.cancelToken &&  config.cancelToken.subscribe(onCanceled)
+      if (config.signal) {
+        config.signal.aborted ? onCanceled() : config.signal.addEventListener('abort', onCanceled)
+      }
+    }
+
+    if (!requestData) {
+      requestData = null
+    }
+
+    request.send(requestData)
 
   })
 }

@@ -1,5 +1,12 @@
 const Cancel = require('./Cancel')
 
+// new CancenToken后有两种情况，
+// 一种是调用了executor传递给外部的函数，这种的有reason，这里暂且叫外部函数为 outsideFun
+// outsideFun主要作用是调用所有订阅的事件
+// 另一种是没有调用，这种是没有reason
+// 在有reason时，也就是在new CancenToken后调用了 outsideFun，在subscribe时，会直接调用要订阅的事件，而不是放进listeners
+// 在没有reason时，也就是在new CancenToken后没有调用了 outsideFun，在subscribe时，会直接订阅事件，等待outsideFun执行触发
+
 function CancelToken(executor) {
   if (typeof executor !== 'function') {
     throw new TypeError('executor must be a function')
@@ -26,7 +33,7 @@ function CancelToken(executor) {
     }
     return promise
   }
-  executor((message) => {
+  executor((message) => { // 此函数传递给外部使用
     if (this.reason) {
       return
     }
@@ -63,7 +70,7 @@ CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
   }
 }
 
-CancelToken.prototype.source = function source() {
+CancelToken.prototype.source = function source() { // 方便外部使用，直接生成token 以及 调用函数
   let cancel
   const token = new CancelToken(function executor(c) {
     cancel = c
