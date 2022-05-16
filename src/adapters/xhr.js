@@ -1,17 +1,17 @@
 const utils = require('../utils')
 const buildFullPath = require('../core/buildFullPath')
 const buildURL = require('../helpers/buildURL')
-import settle from '../core/settle'
-import parseHeaders from '../core/parseHeaders'
-import createError from '../core/createError'
-import defaults from '../defaults'
+const settle = require('../core/settle')
+const parseHeaders = require('../core/parseHeaders')
+const createError = require('../core/createError')
+const defaults = require('../defaults')
 const isURLSameOrigin = require('./../helpers/isURLSameOrigin');
-import cookies from '../helpers/cookies'
-import Cancel from '../cancel/Cancel'
+const cookies = require('../helpers/cookies')
+const Cancel = require('../cancel/Cancel')
 
 module.exports = function xhrAdapter(config) {
   return new Promise((resolve, reject) => {
-    const requestData = config.data
+    let requestData = config.data
     const requestHeaders = config.headers
     const responseType = config.responseType
     let onCanceled
@@ -26,13 +26,12 @@ module.exports = function xhrAdapter(config) {
     if (utils.isFormData(requestData)) {
       delete requestHeaders['Content-Type']
     }
-    const request = new XMLHttpRequest()
+    let request = new XMLHttpRequest()
     if (config.auth) {
       const username = config.auth.username || ''
       const password = config.auth.password ? decodeURI(encodeURIComponent(config.auth.password)) : ''
       requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password)
     }
-
     const fullPath = buildFullPath(config.baseURL, config.url)
     request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true)
     request.timeout = config.timeout

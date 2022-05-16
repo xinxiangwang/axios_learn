@@ -1,5 +1,5 @@
-import utils from '../utils'
-import defaults from '../defaults'
+const utils = require('../utils')
+const defaults = require('../defaults')
 
 module.exports = function transformData(data, headers, fns) {
   const context = this || defaults

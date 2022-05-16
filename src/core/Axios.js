@@ -2,8 +2,9 @@ const InterceptorManager = require("./InterceptorManager")
 const mergeConfig = require('./mergeConfig')
 const validator = require('../helpers/validator')
 const validators = validator.validators
-import buildURL from '../helpers/buildURL'
-import dispatchRequest from './dispatchRequest'
+const buildURL = require('../helpers/buildURL')
+const dispatchRequest = require('./dispatchRequest')
+const utils = require('../utils')
 
 function Axios(instanceConfig) {
   this.defaults = instanceConfig
@@ -53,7 +54,7 @@ Axios.prototype.request = function request(configOrUrl, config) {
     responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected)
   })
 
-  const promise = null;
+  let promise = null;
   if (!synchronousRequestInterceptors) {
     let chain = [dispatchRequest, undefined]
     Array.prototype.unshift.apply(chain, requestInterceptorChain)
@@ -93,5 +94,30 @@ Axios.prototype.getUri = (config) => {
   config = mergeConfig(this.defaults, config)
   return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '')
 }
+
+utils.forEach(['delete', 'get', 'head', 'options'], (method) => {
+  Axios.prototype[method] = function(url, config) {
+    console.log(mergeConfig(config || {}, {
+      method,
+      url,
+      data: (config || {}).data
+    }))
+    return this.request(mergeConfig(config || {}, {
+      method,
+      url,
+      data: (config || {}).data
+    }))
+  }
+})
+
+utils.forEach(['post', 'put', 'patch'], function(method) {
+  Axios.prototype[method] = function(url, config) {
+    return this.request(mergeConfig(config || {}, {
+      method,
+      url,
+      data: config.data
+    }))
+  }
+})
 
 module.exports = Axios

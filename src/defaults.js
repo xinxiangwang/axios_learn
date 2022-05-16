@@ -15,9 +15,9 @@ function setContentTypeIfUnset(headers, value) {
 function getDefaultAdapter() {
   let adapter
   if (typeof XMLHttpRequest !== undefined) { // browsers use
-    adapter = ''
+    adapter = require('./adapters/xhr')
   } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') { // node use
-    adapter = ''
+    adapter = require('./adapters/xhr')
   }
   return adapter
 }

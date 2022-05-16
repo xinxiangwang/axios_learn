@@ -102,7 +102,7 @@ function trim(str) {
   return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
 }
 
-function isFormData() {
+function isFormData(val) {
   return toString.call(val) === '[object FormData]'
 }
 

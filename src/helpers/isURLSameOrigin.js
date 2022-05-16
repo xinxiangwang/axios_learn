@@ -26,6 +26,7 @@ module.exports = (
       }
       originURL = resolveURL(window.location.href)
       return function isURLSameOrigin(requestURL) {
+        console.log(requestURL)
         const parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL
         return (parsed.protocol === originURL.protocol && parsed.host === originURL.host)
       }

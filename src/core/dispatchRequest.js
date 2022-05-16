@@ -1,10 +1,8 @@
-import utils from '../utils'
-import Cancel from '../cancel/Cancel'
-import transformData from './transformData'
-import { util } from 'webpack'
-import defaults from '../defaults'
-import isCancel from '../cancel/isCancel'
-
+const utils = require('../utils')
+const Cancel = require('../cancel/Cancel')
+const defaults = require('../defaults')
+const isCancel = require('../cancel/isCancel')
+const transformData = require('./transformData')
 
 function throwIfCancellationRequested(config) {
   if (config.cancelToken) {
