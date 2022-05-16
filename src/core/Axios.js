@@ -2,6 +2,8 @@ const InterceptorManager = require("./InterceptorManager")
 const mergeConfig = require('./mergeConfig')
 const validator = require('../helpers/validator')
 const validators = validator.validators
+import buildURL from '../helpers/buildURL'
+import dispatchRequest from './dispatchRequest'
 
 function Axios(instanceConfig) {
   this.defaults = instanceConfig
@@ -53,8 +55,43 @@ Axios.prototype.request = function request(configOrUrl, config) {
 
   const promise = null;
   if (!synchronousRequestInterceptors) {
-    // let chain = [dispa]
+    let chain = [dispatchRequest, undefined]
+    Array.prototype.unshift.apply(chain, requestInterceptorChain)
+    chain = chain.concat(responseInterceptorChain)
+    promise = Promise.resolve(config)
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift())
+    }
+    return promise
   }
+
+  let newConfig = config
+  while (requestInterceptorChain.length) {
+    const onFulfilled = requestInterceptorChain.shift()
+    const onRejected = requestInterceptorChain.shift()
+    try {
+      newConfig = onFulfilled(newConfig)
+    } catch (err) {
+      onRejected(err)
+      break
+    }
+  }
+
+  try {
+    promise = dispatchRequest(newConfig)
+  } catch (err) {
+    return Promise.reject(err)
+  }
+
+  while (responseInterceptorChain.length) {
+    promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift())
+  }
+  return promise
+}
+
+Axios.prototype.getUri = (config) => {
+  config = mergeConfig(this.defaults, config)
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '')
 }
 
 module.exports = Axios
