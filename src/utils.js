@@ -1,3 +1,5 @@
+const bind = require("./helpers/bind")
+
 function isArray(val) {
   return Array.isArray(val)
 }
@@ -46,6 +48,18 @@ function forEach(obj, fn) {
       }
     }
   }
+}
+
+// 循环b 将b上的属性方法复制给a b上的方法在赋值的时候会改变上下文，上下文为thisArg
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg)
+    } else {
+      a[key] = val
+    }
+  })
+  return a
 }
 
 function merge() { // 合并参数
@@ -160,6 +174,7 @@ function isNumber(val) {
 module.exports = {
   isPlainObject,
   forEach,
+  extend,
   merge,
   isArray,
   isUndefined,

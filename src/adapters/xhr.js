@@ -44,6 +44,7 @@ module.exports = function xhrAdapter(config) {
       const responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null
       const responseData = !responseType || responseType === 'text' || responseType === 'json' ?
         request.responseText : request.response
+        console.log(JSON.parse(responseData))
       const response = {
         data: responseData,
         status: request.status,

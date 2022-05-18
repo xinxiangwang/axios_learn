@@ -39,6 +39,7 @@ module.exports = function dispatchRequest(config) {
 
   const adapter = config.adapter || defaults.adapter
   return adapter(config).then(function onAdapterResolution(response) {
+    console.log(config)
     throwIfCancellationRequested(config)
     response.data = transformData.call(
       config,

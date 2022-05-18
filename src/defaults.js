@@ -43,8 +43,9 @@ const defaults = {
     clarifyTimeoutError: false
   },
   adapter: getDefaultAdapter(),
-  transformRequest: [
+  transformResponse: [
     (data, headers) => {
+      console.log(data)
       normalizeHeaderName(headers, 'Accept')
       normalizeHeaderName(headers, 'Content-Type')
       if (
@@ -73,10 +74,12 @@ const defaults = {
     }
   ],
   transformResponse: [function transformResponse(data) {
+    console.log('zxczxczxczcccccccccccccc')
     const transitional = this.transitional || defaults.transitional
     const silentJSONParsing = transitional && transitional.silentJSONParsing
     const forcedJSONParsing = transitional && transitional.forcedJSONParsing
     const strictJSONParsing = !silentJSONParsing && this.responseType === 'json'
+    console.log(strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length))
     if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
       try {
         return JSON.parse(data)
@@ -87,8 +90,8 @@ const defaults = {
           }
         }
       }
-      return data
     }
+    return data
   }],
   timeout: 0,
   xsrfCookieName: 'XSRF-TOKEN',
